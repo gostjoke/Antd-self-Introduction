@@ -1,69 +1,81 @@
 import React from 'react';
 import { Card, Row, Col, Typography } from 'antd';
-const { Title } = Typography;
+
+const { Title, Paragraph } = Typography;
 
 const SkillsPage: React.FC = () => {
+    const cardStyle = {
+        borderRadius: 8,
+        boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+    };
+
     return (
-        <React.Fragment>
-            <Title level={2}>Skills</Title>
-            <p>這是關於頁面的內容</p>   
+        <>
+            <Title level={2} style={{ marginBottom: 8 }}>Skills</Title>
+            <Paragraph style={{ fontSize: 16, color: '#555' }}>
+                This page showcases my technical skillset including frontend, backend, databases, tools, and analytics.
+            </Paragraph>
 
-            <Row gutter={16} style={{ marginTop: 20 }}>
+            <Row gutter={[24, 24]} style={{ marginTop: 20 }}>
                 <Col span={8}>
-                    <Card title="Frontend" bordered={false}>
-                        <ul >
-                            <li>HTML/CSS/JS</li>
+                    <Card title="Frontend" bordered={false} style={cardStyle}>
+                        <ul>
+                            <li>HTML / CSS / JavaScript</li>
                             <li>React</li>
-                            <li>Bootstrap, MUI, ANTD</li>
+                            <li>Bootstrap, MUI, Ant Design</li>
                         </ul>
                     </Card>
                 </Col>
                 <Col span={8}>
-                    <Card title="Backend" bordered={false}>
-                        <ul >
-                            <li>Python</li>
-                            <li>Golang</li>
-                            <li>Bootstrap, MUI, ANTD</li>
+                    <Card title="Backend" bordered={false} style={cardStyle}>
+                        <ul>
+                            <li>Python, Golang</li>
+                            <li>Django, Beego, FastAPI</li>
+                            <li>RESTful API design</li>
                         </ul>
                     </Card>
                 </Col>
                 <Col span={8}>
-                    <Card title="Database" bordered={false}>
-                        <ul >
-                            <li>MySQL, MSSQL, Postgresql,ORM</li>
+                    <Card title="Databases" bordered={false} style={cardStyle}>
+                        <ul>
+                            <li>MySQL, PostgreSQL, MSSQL</li>
                             <li>MongoDB</li>
-                            <li>SAP ABAP</li>
+                            <li>SAP ABAP, ORM</li>
                         </ul>
-                    </Card>
-                </Col>
-            </Row>
-            <Row gutter={16} style={{ marginTop: 20 }}>
-                <Col span={8}>
-                    <Card title="Frontend(2023)" bordered={false}>
-                        <ul >
-                            <li>HTML/CSS/JS</li>
-                            <li>React</li>
-                            <li>Bootstrap, MUI, ANTD</li>
-                        </ul>
-                    </Card>
-                </Col>
-                <Col span={8}>
-                    <Card title="Backend(2021)" bordered={false}>
-                        <ul >
-                            <li>Python</li>
-                            <li>Golang</li>
-                            <li>Bootstrap, MUI, ANTD</li>
-                        </ul>
-                    </Card>
-                </Col>
-                <Col span={8}>
-                    <Card title="Database" bordered={false}>
-                        誠信、創新、合作、卓越
                     </Card>
                 </Col>
             </Row>
 
-        </React.Fragment>
+            <Row gutter={[24, 24]} style={{ marginTop: 20 }}>
+                <Col span={8}>
+                    <Card title="Version Control & DevOps" bordered={false} style={cardStyle}>
+                        <ul>
+                            <li>Git, GitHub, GitLab</li>
+                            <li>Docker, Podman</li>
+                            <li>Basic CI/CD concepts</li>
+                        </ul>
+                    </Card>
+                </Col>
+                <Col span={8}>
+                    <Card title="IDE & Tooling" bordered={false} style={cardStyle}>
+                        <ul>
+                            <li>Visual Studio Code, Azure Data Studio</li>
+                            <li>PyCharm, Jupyter Notebook</li>
+                            <li>Postman, Git Bash, Copilot</li>
+                        </ul>
+                    </Card>
+                </Col>
+                <Col span={8}>
+                    <Card title="Analytics & Visualization" bordered={false} style={cardStyle}>
+                        <ul>
+                            <li>Pandas, NumPy, Seaborn</li>
+                            <li>Excel, Tableau</li>
+                            <li>Apache ECharts, AntV</li>
+                        </ul>
+                    </Card>
+                </Col>
+            </Row>
+        </>
     );
 };
 

@@ -1,16 +1,14 @@
 import React from 'react';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
-import { useNavigate, useLocation } from 'react-router-dom';
-import { HomeOutlined, UserOutlined, PhoneOutlined, FundProjectionScreenOutlined } from '@ant-design/icons';
+import { useLocation, Link } from 'react-router-dom';
+import {
+    HomeOutlined,
+    UserOutlined,
+    PhoneOutlined,
+    FundProjectionScreenOutlined,
+} from '@ant-design/icons';
 
 const { Header, Content, Footer } = Layout;
-
-const items = [
-    { key: '/', label: 'Home', icon: <HomeOutlined /> },
-    { key: '/about', label: 'About', icon: <UserOutlined /> },
-    { key: '/skills', label: 'Skills', icon: <FundProjectionScreenOutlined /> }, // Assuming you have a SkillsPage component
-    { key: '/contact', label: 'Contact', icon: <PhoneOutlined /> },
-];
 
 interface AppLayoutProps {
     children?: React.ReactNode;
@@ -19,18 +17,49 @@ interface AppLayoutProps {
 
 const AppLayout: React.FC<AppLayoutProps> = ({
     children,
-    breadcrumbItems = [{ title: 'Home' }]
+    breadcrumbItems = [{ title: 'Home' }],
+
 }) => {
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();
 
-    const navigate = useNavigate();
     const location = useLocation();
 
-    const handleMenuClick = (e: { key: string }) => {
-        navigate(e.key);
-    };
+    const items = [
+        {
+            key: '/',
+            label: (
+                <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <HomeOutlined /> Home
+                </Link>
+            ),
+        },
+        {
+            key: '/about',
+            label: (
+                <Link to="/about" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <UserOutlined /> About
+                </Link>
+            ),
+        },
+        {
+            key: '/skills',
+            label: (
+                <Link to="/skills" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <FundProjectionScreenOutlined /> Skills
+                </Link>
+            ),
+        },
+        {
+            key: '/contact',
+            label: (
+                <Link to="/contact" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <PhoneOutlined /> Contact
+                </Link>
+            ),
+        },
+    ];
 
     return (
         <Layout style={{ minHeight: '100vh' }}>
@@ -50,14 +79,20 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                     mode="horizontal"
                     selectedKeys={[location.pathname]}
                     items={items}
-                    onClick={handleMenuClick}
-                    style={{ flex: 1, minWidth: 0,  justifyContent: 'flex-end' }}
+                    style={{
+                        flex: 1,
+                        minWidth: 0,
+                        justifyContent: 'flex-end',
+                        display: 'flex',
+                    }}
                 />
             </Header>
-            <Content style={{ padding: '0', flex: 1 }}>
+            <Content style={{ padding: 0, flex: 1 }}>
                 <Breadcrumb
                     style={{ margin: '16px 24px' }}
-                    items={breadcrumbItems}
+                    items={breadcrumbItems.map(item => ({
+                        title: item.href ? <Link to={item.href}>{item.title}</Link> : item.title,
+                    }))}
                 />
                 <div
                     style={{
@@ -71,9 +106,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                     {children || 'Welcome to the main page!'}
                 </div>
             </Content>
-            <Footer style={{ textAlign: 'center' }}>
-                Tien-Wei Hsu created 2025@
-            </Footer>
+            <Footer style={{ textAlign: 'center' }}>Tien-Wei Hsu created 2025@</Footer>
         </Layout>
     );
 };
