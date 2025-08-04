@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, Row, Col, Typography } from 'antd';
 const { Title } = Typography;
 
-const AboutPage: React.FC = () => {
+const SkillsPage: React.FC = () => {
     return (
         <React.Fragment>
             <Title level={2}>Skills</Title>
@@ -67,4 +67,4 @@ const AboutPage: React.FC = () => {
     );
 };
 
-export default AboutPage;
+export default SkillsPage;
