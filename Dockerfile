@@ -19,6 +19,9 @@ RUN npm run build
 # === Production stage ===
 FROM nginx:alpine
 
+# 複製自定義 nginx 配置
+COPY nginx.conf /etc/nginx/nginx.conf
+
 # 複製打包好的前端檔案到 Nginx 目錄
 COPY --from=build /app/dist /usr/share/nginx/html
 

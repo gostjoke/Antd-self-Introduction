@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: antd-self-introduction
     ports:
-      - "3000:80"
+      - "0.0.0.0:3000:80"
     restart: unless-stopped
     networks:
       - app-network
