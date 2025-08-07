@@ -20,6 +20,7 @@ const AppLayout: React.FC<AppLayoutProps> = ({
     breadcrumbItems = [{ title: 'Home' }],
 
 }) => {
+    
     const {
         token: { colorBgContainer, borderRadiusLG },
     } = theme.useToken();

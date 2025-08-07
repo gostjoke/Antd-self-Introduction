@@ -1,6 +1,6 @@
 // App.tsx
 import React from 'react';
-import { Routes, Route, useLocation, Link } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
 import AppLayout from './components/AppLayout';
 import HomePage from './pages/HomePage';

@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  antd-self-introduction:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: antd-self-introduction
+    ports:
+      - "3000:80"
+    restart: unless-stopped
+    networks:
+      - app-network
+    volumes:
+      # 可選：掛載 nginx 日誌到本地
+      - ./logs:/var/log/nginx
+    environment:
+      - NODE_ENV=production
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  nginx-logs:
