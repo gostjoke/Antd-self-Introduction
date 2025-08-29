@@ -7,6 +7,7 @@ import {
     PhoneOutlined,
     FundProjectionScreenOutlined,
 } from '@ant-design/icons';
+import ChatPage from './ChatPage';
 
 const { Header, Content, Footer } = Layout;
 
@@ -108,6 +109,8 @@ const AppLayout: React.FC<AppLayoutProps> = ({
                 </div>
             </Content>
             <Footer style={{ textAlign: 'center' }}>Tien-Wei Hsu created 2025@</Footer>
+            {/* 全域聊天組件 */}
+            <ChatPage />
         </Layout>
     );
 };
