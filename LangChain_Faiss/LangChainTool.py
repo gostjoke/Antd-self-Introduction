@@ -13,36 +13,28 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-def generate_questions(texts):
-    qa_pairs = []
-    for s in texts:
-        if "是" in s:
-            parts = s.split("是", 1)
-            subject = parts[0].strip()
-            predicate = parts[1].strip(" 。， ")
+def generate_variants(texts: list) -> list:
+    variants = []
+    for i in texts:
+        i = i.strip("。，；,.;!?！?")  # 清理標點
+        variants.append(i)  # 原句
 
-            q1 = f"誰是{predicate}？"
-            q2 = f"{subject}是什麼？"
-            q3 = f"{subject}是?"   # ✅ 新增一個簡短問法
+        if "是" in i:
+            parts = i.split("是", 1)
+            if len(parts) == 2:
+                left, right = parts[0].strip(), parts[1].strip()
 
-            qa_pairs.extend([q1, q2, q3])
-    return qa_pairs
+                # 倒裝句
+                variants.append(f"{right}是{left}。")
 
+                # 問句：誰/什麼
+                if len(left) > 0 and len(right) > 0:
+                    variants.append(f"{left}是誰？是{right}。")
+                    variants.append(f"{right}是什麼？是{left}。")
+                    variants.append(f"{right}是誰？是{left}。")
+                    variants.append(f"誰是{right}？是{left}。")
+    return variants
 
-def build_docs_with_questions(texts):
-    """將原始句子與問句一起轉成 Document"""
-    docs = []
-
-    for i, s in enumerate(texts):
-        # 原始句子
-        docs.append(Document(page_content=s, metadata={"type": "statement", "index": i}))
-
-    # 產生問句
-    questions = generate_questions(texts)
-    for j, q in enumerate(questions):
-        docs.append(Document(page_content=q, metadata={"type": "question", "q_index": j}))
-
-    return docs
 
 # 環境變數
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -53,23 +45,25 @@ texts = [
     "LangChain 是一個強大的框架，用來建構 LLM 應用。",
     "FAISS 是由 Facebook AI 提供的向量檢索資料庫。",
     "你可以將文件轉換成 Embeddings，然後用 FAISS 做相似度搜尋。",
-    "Kevin Sin 是NSG的大PM",
-    "Danny Huang 是NSG的大PM",
+    "Kevin Sin是NSG的大PM。",
+    "Danny Huang是NSG的總經理。",
 ]
 
+texts = generate_variants(texts)
 
-# docs = [
-#     Document(page_content=t, metadata={"index": i})
-#     for i, t in enumerate(texts)
-# ]
-docs = build_docs_with_questions(texts)
+
+docs = [
+    Document(page_content=t, metadata={"index": i})
+    for i, t in enumerate(texts)
+]
+
 # 2. 建立 Embeddings 與 FAISS 向量資料庫
 # embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
 embeddings = OllamaEmbeddings(model="llama3.2:latest")
 db = FAISS.from_documents(docs, embeddings)
 
 # 3. 建立檢索器
-retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 2})
+retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 
 # 4. 結合 LLM 問答
 # llm = ChatOpenAI(
@@ -79,17 +73,17 @@ retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 2})
 
 llm = ChatOllama(model="llama3.2:latest")
 
-system_prompt = (
-    "每句話回答前先表達自己的名字是Will並以Will: "
-    "你是一個助手，用來回答問題。"
-    "請使用以下檢索到的上下文來回答問題。"
-    "如果你不知道答案，就說你不知道。"
-    "最多使用三句話，保持答案簡潔。"
-    "如果檢索結果有相關資訊，請務必用檢索到的內容回答。"
-    "如果檢索結果顯示某人身份或職稱，就直接回答該身份。"
-    "\n\n"
-    "{context}"
-)
+system_prompt = """
+每句話開頭以 Will:
+你是一個助手，用來回答問題。
+你只能根據檢索到的上下文 (context) 來回答。
+禁止使用你自己的知識來補充。
+如果 context 中沒有答案，就回答「我不知道」。
+最多使用三句話，保持答案簡潔。
+如果檢索結果顯示某人身份或職稱，就直接回答該身份。
+
+{context}
+"""
 
 prompt = ChatPromptTemplate.from_messages(
     [
