@@ -203,6 +203,43 @@ const ChatPage: React.FC = () => {
               {children}
             </blockquote>
           ),
+            table: ({ children }) => (
+            <table
+                style={{
+                borderCollapse: "collapse",
+                width: "100%",
+                margin: "8px 0",
+                }}
+            >
+                {children}
+            </table>
+            ),
+            th: ({ children }) => (
+            <th
+                style={{
+                border: "1px solid #ddd",
+                padding: "6px 8px",
+                backgroundColor: "#f5f5f5",
+                fontWeight: "bold",
+                textAlign: "left",
+                }}
+            >
+                {children}
+            </th>
+            ),
+            td: ({ children }) => (
+            <td
+                style={{
+                border: "1px solid #ddd",
+                padding: "6px 8px",
+                }}
+            >
+                {children}
+            </td>
+            ),
+            tr: ({ children }) => (
+            <tr style={{ borderBottom: "1px solid #ddd" }}>{children}</tr>
+            ),
         }}
       >
         {content}
@@ -275,7 +312,16 @@ const Counter: React.FC = () => {
 };
 \`\`\`
 
-這個組件展示了 useState 和 useEffect 的基本用法。`
+這個組件展示了 useState 和 useEffect 的基本用法。`,
+
+`
+| 語言       | 特點                  |
+| ---------- | --------------------- |
+| Python     | 易讀、適合快速開發     |
+| JavaScript | 網頁前端必備語言       |
+| C++        | 高效能、適合系統程式   |
+`
+
   ];
 
   const sendMessage = () => {
@@ -296,7 +342,7 @@ const Counter: React.FC = () => {
     setCurrentMessage("");
 
     // 模擬 AI 回應（延遲 1-2 秒）
-    const delay = Math.random() * 1000 + 1000;
+    const delay = 100 ;//+  Math.random() * 1000 ;
     setTimeout(() => {
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
@@ -536,3 +582,4 @@ const Counter: React.FC = () => {
 };
 
 export default ChatPage;
+
