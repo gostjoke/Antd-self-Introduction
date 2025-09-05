@@ -8,32 +8,48 @@ from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 from langchain.docstore.document import Document
-
+import re
+import regex
 from dotenv import load_dotenv
 load_dotenv()
 
 
 def generate_variants(texts: list) -> list:
-    variants = []
-    for i in texts:
-        i = i.strip("。，；,.;!?！?")  # 清理標點
-        variants.append(i)  # 原句
+    variants = set()
+    PUNCT = r"。；；,.;!?！？、"
+    def clean_sentence(text: str) -> str:
+        return re.sub(fr"^[\s{PUNCT}]+|[\s{PUNCT}]+$", "", text)
 
-        if "是" in i:
-            parts = i.split("是", 1)
+    for text in texts:
+        # 去掉前後中英文標點
+        sentence = clean_sentence(text)
+
+        if not sentence:
+            continue
+
+        # 原句
+        variants.add(sentence)
+
+        # 如果包含「是」，嘗試生成變體
+        if "是" in sentence:
+            parts = sentence.split("是", 1)
             if len(parts) == 2:
                 left, right = parts[0].strip(), parts[1].strip()
 
-                # 倒裝句
-                variants.append(f"{right}是{left}。")
+                if left and right:
+                    # 倒裝句
+                    variants.add(f"{right}是{left}。")
 
-                # 問句：誰/什麼
-                if len(left) > 0 and len(right) > 0:
-                    variants.append(f"{left}是誰？是{right}。")
-                    variants.append(f"{right}是什麼？是{left}。")
-                    variants.append(f"{right}是誰？是{left}。")
-                    variants.append(f"誰是{right}？是{left}。")
-    return variants
+                    # 問句（誰是 right）
+                    variants.add(f"誰是{right}？是{left}。")
+
+                    # 問句（left 是誰）
+                    variants.add(f"{left}是誰？是{right}。")
+
+                    # 問句（right 是什麼）
+                    variants.add(f"{right}是什麼？是{left}。")
+
+    return list(variants)
 
 
 # 環境變數
@@ -59,11 +75,38 @@ docs = [
 
 # 2. 建立 Embeddings 與 FAISS 向量資料庫
 # embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
-embeddings = OllamaEmbeddings(model="llama3.2:latest")
-db = FAISS.from_documents(docs, embeddings)
+"""
+但 llama3.2 是聊天/生成模型，不是向量嵌入模型。用它做 embedding 
+會很差（或直接不對），FAISS 當然就抓不到「Kevin Sin」那句。👇給你兩個可用方案與最小修正。
+"""
+# embeddings = OllamaEmbeddings(model="llama3.2:latest")
+# embeddings = OpenAIEmbeddings(model="text-embedding-3-small")  # 或 text-embedding-3-large
+# ollama pull nomic-embed-text
+from langchain_community.embeddings import OllamaEmbeddings
+embeddings = OllamaEmbeddings(model="nomic-embed-text")  # 或 "mxbai-embed-large" 
+
+
+"""
+1) 用「餵 Cosine」的方式建索引
+
+FAISS 在 LangChain 預設是 L2 距離；而句向量常用 Cosine 相似度。做法是把向量 先做 L2 正規化 再用 L2 搜尋（等效於 Cosine）。
+👉 只要在 from_documents 加 normalize_L2=True：
+"""
+db = FAISS.from_documents(docs, embeddings, normalize_L2=True)
 
 # 3. 建立檢索器
-retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 4})
+"""
+2) k 調大、MMR 更穩
+"""
+# retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 4})
+retriever = db.as_retriever(
+    search_type="mmr",                # 改成 mmr
+    search_kwargs={"k": 8, "fetch_k": 20, "lambda_mult": 0.5}
+)
+print("=== DEBUG Retrieved ===")
+for r in retriever.get_relevant_documents("誰是 Kevin Sin"):
+    print(r.metadata, r.page_content)
+print("=======================")
 
 # 4. 結合 LLM 問答
 # llm = ChatOpenAI(
@@ -74,10 +117,8 @@ retriever = db.as_retriever(search_type="similarity", search_kwargs={"k": 4})
 llm = ChatOllama(model="llama3.2:latest")
 
 system_prompt = """
-每句話開頭以 Will:
-你是一個助手，用來回答問題。
-你只能根據檢索到的上下文 (context) 來回答。
-禁止使用你自己的知識來補充。
+回答必須以「Will: 」開頭，且最多三句話。
+如果 context 中找到某人對應的身份或職稱，就直接輸出該身份或職稱，如果在資料庫發現就不要用自己的知識補充。
 如果 context 中沒有答案，就回答「我不知道」。
 最多使用三句話，保持答案簡潔。
 如果檢索結果顯示某人身份或職稱，就直接回答該身份。
@@ -102,3 +143,5 @@ result = qa_chain.invoke({"input": query})
 db.save_local("faiss_index")
 print("問題:", query)
 print("回答:", result["answer"])
+
+
