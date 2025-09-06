@@ -36,10 +36,6 @@ def initialize_rag():
     else:
         print("載入已存在的RAG索引！")
 
-# 在應用啟動時初始化RAG
-@app.before_first_request
-def startup():
-    initialize_rag()
 
 # 原有的API
 @app.route("/hello", methods=["GET"])

@@ -29,7 +29,7 @@ const HomePage: React.FC = () => {
             {/* 右側：文字介紹 */}
             <Col span={12}>
                 <Space direction="vertical" size="middle">
-                    <Title style={{ fontSize: 80, margin: 0 }}>Hellow!</Title>
+                    <Title style={{ fontSize: 80, margin: 0 }}>Hello!</Title>
                     <Title style={{ fontSize: 40, margin: 0 }}>My Name is Tien-Wei Hsu</Title>
                     <Paragraph
                         ellipsis={{ rows: 4, expandable: true, symbol: 'more...' }}
